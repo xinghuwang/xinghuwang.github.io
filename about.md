@@ -1,23 +1,28 @@
 ---
-layout: default
-title: "关于：About"
+layout: page
+title: About
 ---
 
-## 个人简介：
 
-* 王兴虎
-* Web后台开发
+###关于我
+网名小胡子（其实没多少胡子）
+现在是一名苦逼的研究僧，以后希望做个前端工程师。
 
-## 联系方式
 
-<p class="contact">
- <a href="https://github.com/xinghuwang" title="Github联系我"><img src="http://www.github.com/favicon.ico" width="24" height="24" style="display:inline-block;vertical-align:middle"></a><br/>
-邮箱: wxinhu@gmail.com 
-</p>
 
-### 关于本站：
+喜欢猫猫，会随身随包带点猫粮以防遭遇可怜的小野猫
 
-* 模板及样式来源[Useful Paradigm](http://usefulparadigm.com/)
+喜欢运动，曾经热爱打篮球，现在就只能跑跑步了，大爱慢跑
 
-## 其他流言
-* 宅男一个
+喜欢听音乐，特别是欧美pop、乡村以及轻度电音
+
+更喜欢一边听音乐一边跑步，简直是一种享受
+
+喜欢摄影，没钱买单反，但是捣鼓了一个二手胶卷单反，拍些身边的事
+
+
+###关于前端
+本科考研想考交互设计，没考上后回本校读研，然后接触到了前端开发，非常感兴趣。
+相对于JS，对CSS更感兴趣，对网页样式修改会有点轻度强迫症
+工具控 
+现在处于努力学习中，相信有热情加坚持一定能做好

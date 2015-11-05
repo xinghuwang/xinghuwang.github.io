@@ -1,37 +1,32 @@
-permalink: /blog/:year/:month/:title.html 
-include: ['.htaccess']
-exclude: [".rvmrc", ".rbenv-version", "README.md", "Rakefile", "changelog.md", "CNAME", "Gemfile", "Gemfile.lock"]
-markdown: kramdown
-highlights: pygments
-url: 
-cdn_url: 7u2t01.com1.z0.glb.clouddn.com
-lsi: false
-safe: true
-timezone: Asia/Shanghai
-auto: false 
+# Dependencies
+markdown:         rdiscount
+#highlighter:      pygments
+highlighter:      Rouge
 
-paginate: 8
-paginate_path: "page:num"
+#
+encoding:         "utf-8"
+# Permalinks
+permalink:        pretty
 
-kramdown:
-  auto_ids: true,
-  footnote_nr: 1
-  entity_output: as_char
-  toc_levels: 1..6
-  use_coderay: false
+gems: [jekyll-paginate]
 
-JB :
-  IMAGE_PATH : http://xinghuwang.github.io/images
+# Setup
+title:            HuS
+tagline:          'Time is limited, To be a better man'
+description:      'Hello,World! Here is my personal weblog about technology and life.'
+url:              http://shelldone.com
 
-# presonal config
-domain: http://xinghuwang.github.io
-title: 十字路口
-description: happy
-author: wangxinghu
-email: wxinhu@gmail.com
-github: xinghuwang
+author:
+  name:           'SooHu'
+  url:            https://github.com/SooHu
 
-config:
-  js_dir:
-  img_dir:
-  css_dir:
+paginate:         5
+
+# Custom vars
+version:          1.0.0
+
+# duoshuo
+comments :
+    provider : duoshuo
+    duoshuo :
+      short_name : soohu

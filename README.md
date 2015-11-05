@@ -1,36 +1,39 @@
-我的个人博客
-================
+##this is my blog
+博客搭载在github上，地址:soohu.github.io
 
-####博客地址
+##Usage
+如果觉得可以的话可以直接clone这个项目
 
-http://xinghuwang.github.io
+post
 
-####使用本项目作为博客模板，仅需如下几步：
-
-1. 首先Fork或Download一份本项目代码。 
-2. 修改_config.yaml及about.md文件，以变更个人信息。 
-3. 修改_include目录下相关文件，以配置网站统计(analytics.html)，网友评论(comment.html)，右侧栏目(categories.html),热门文章(hot.html),友情链接(links.html)等。 
-4. 修改CNAME文件，以绑定自己的域名。 
-5. 删除_posts下文章，换成你自己的。 
-6. 去谷歌自定义搜索新建一个你的搜索引擎，把你的Id替换根目录下search.html我的ID
-7. 最后，push到你自己的博客Repo~ 
+* title
+* layout
+* author
+* category
+* tag
 
 
-####本项目使用了
-1. CNZZ的网站统计服务，官网：http://cnzz.com 
-2. 多说的评论功能，官网:http://duoshuo.com/
+##Options
+施工中
 
-####联系方式
+##Development
+1. 添加了多说评论插件
+2. 修改博客样式更偏向中文
+3. 博客样式个人化修改
+4. 增加highlight代码高亮
+5. 添加了分类页、归档页和标签页
+6. ...
 
-联系方式：qq(65703065), Email(wxinhu@gmail.com) 
+
+##Improvement
+1. 提高响应式
 
 
-####使用本项目作模板的博客链接
+##Author
+博客原作者:Mark Otto 
+[github](github.com/mdo)
 
-* http://www.94geek.com  
-* http://www.haidaoxiaofei.me  
-* http://www.malphi.net  
-* http://happyaround.com  
-* http://tencentlocation.github.io  
-* http://wtaps.github.io 
-* http://maoshu.cc
+博客修改:SooHu
+
+##License
+MIT
