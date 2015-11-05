@@ -11,9 +11,9 @@ permalink:        pretty
 gems: [jekyll-paginate]
 
 # Setup
-title:            tiger
-tagline:          'be happy'
-description:      'enjoy life'
+title:            十字路口
+tagline:          '每天进步一点'
+description:      '不写博客的程序员不是好码农'
 url:              http://xinghuwang.github.io
 
 author:
