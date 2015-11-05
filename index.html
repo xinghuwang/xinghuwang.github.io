@@ -9,7 +9,11 @@ title: Home
   {% for post in paginator.posts %}
   <div class="post">
     <div class="post-heading">
-      <img src="/public/img/{{ post.author }}.jpg">
+        {% if post.author == "wangxinghu" %}
+          <img src="/public/img/{{ post.author }}.jpg">
+        {% else %}
+          <img src="/public/img/other.jpg">
+        {% endif %}
       <h1 class="post-title">
         <a class="post-title-home" href="{{ post.url }}">
           {{ post.title }}

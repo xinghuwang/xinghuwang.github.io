@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<!-- saved from url=(0073)https://nikic.github.io/2014/12/22/PHPs-new-hashtable-implementation.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta charset="UTF-8">
+        <title>PHP's new hashtable implementation</title>
+        <link rel="stylesheet" href="./PHP's new hashtable implementation_files/reset.css">
+        <link rel="stylesheet" href="./PHP's new hashtable implementation_files/main.css">
+        <link rel="stylesheet" href="./PHP's new hashtable implementation_files/highlight.css">
+        <link rel="alternate" type="application/rss+xml" href="https://nikic.github.io/rss.xml">
+        <script type="text/javascript" async="" src="./PHP's new hashtable implementation_files/ga.js"></script><script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-27300026-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            })();
+        </script>
+    <script type="text/javascript" async="" src="./PHP's new hashtable implementation_files/embed.js"></script><style id="style-1-cropbar-clipper">/* Copyright 2014 Evernote Corporation. All rights reserved. */
+.en-markup-crop-options {
+    top: 18px !important;
+    left: 50% !important;
+    margin-left: -100px !important;
+    width: 200px !important;
+    border: 2px rgba(255,255,255,.38) solid !important;
+    border-radius: 4px !important;
+}
+
+.en-markup-crop-options div div:first-of-type {
+    margin-left: 0px !important;
+}
+</style></head>
+    <body cz-shortcut-listen="true">
+        <header>
+            Blog by <strong>nikic</strong>.
+            Find me on <a href="https://github.com/nikic">GitHub</a>,
+            <a href="http://stackoverflow.com/users/385378/nikic">StackOverflow</a>
+            and <a href="http://twitter.com/#!/nikita_ppv">Twitter</a>.
+            Learn more <a href="https://nikic.github.io/aboutMe.html">about me</a>.
+        </header>
+        <section>
+            <section class="post">
+    <header>
+        <a href="https://nikic.github.io/" class="backLink">« Back to article overview.</a>
+        <h1>PHP's new hashtable implementation</h1>
+        <time datetime="2014-12-22" pubdate="">
+            22. December 2014
+        </time>
+    </header>
+    <section>
+        <p>About three years ago I wrote an article <a href="https://nikic.github.io/2011/12/12/How-big-are-PHP-arrays-really-Hint-BIG.html">analyzing the memory usage of arrays</a> in PHP 5. As part of the
+work on the upcoming PHP 7, large parts of the Zend Engine have been rewritten with a focus on smaller data structures
+requiring fewer allocations. In this article I will provide an overview of the new hashtable implementation and show why
+it is more efficient than the previous implementation.</p>
+
+<p>To measure memory utilization I am using the following script, which tests the creation of an array with 100000 distinct
+integers:</p>
+
+<div class="highlight"><pre><code class="language-php" data-lang="php"><span class="nv">$startMemory</span> <span class="o">=</span> <span class="nb">memory_get_usage</span><span class="p">();</span>
+<span class="nv">$array</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100000</span><span class="p">);</span>
+<span class="k">echo</span> <span class="nb">memory_get_usage</span><span class="p">()</span> <span class="o">-</span> <span class="nv">$startMemory</span><span class="p">,</span> <span class="s2">" bytes</span><span class="se">\n</span><span class="s2">"</span><span class="p">;</span></code></pre></div>
+
+<p>The following table shows the results using PHP 5.6 and PHP 7 on 32bit and 64bit systems:</p>
+
+<pre><code>        |   32 bit |    64 bit
+------------------------------
+PHP 5.6 | 7.37 MiB | 13.97 MiB
+------------------------------
+PHP 7.0 | 3.00 MiB |  4.00 MiB
+</code></pre>
+
+<p>In other words, arrays in PHP 7 use about 2.5 times less memory on 32bit and 3.5 on 64bit (LP64), which is quite
+impressive.</p>
+
+<h2 id="introduction-to-hashtables">Introduction to hashtables</h2>
+
+<p>In essence PHP’s arrays are ordered dictionaries, i.e. they represent an ordered list of key/value pairs, where the
+key/value mapping is implemented using a hashtable.</p>
+
+<p>A <a href="http://en.wikipedia.org/wiki/Hash_table">Hashtable</a> is an ubiquitous data structure, which essentially solves the problem that computers can
+only directly represent continuous integer-indexed arrays, whereas programmers often want to use strings or other
+complex types as keys.</p>
+
+<p>The concept behind a hashtable is very simple: The string key is run through a hashing function, which returns an
+integer. This integer is then used as an index into a “normal” array. The problem is that two different strings can
+result in the same hash, as the number of possible strings is virtually infinite while the hash is limited by the
+integer size. As such hashtables need to implement some kind of collision resolution mechanism.</p>
+
+<p>There are two primary approaches to collision resolution: <a href="http://en.wikipedia.org/wiki/Open_addressing">Open addressing</a>, where elements will
+be stored at a different index if a collision occurs, and chaining, where all elements hashing to the same index are
+stored in a linked list. PHP uses the latter mechanism.</p>
+
+<p>Typically hashtables are not explicitly ordered: The order in which elements are stored in the underlying array depends
+on the hashing function and will be fairly random. But this behavior is not consistent with the semantics of PHP arrays:
+If you iterate over a PHP array you will get back the elements in the exact order in which they were inserted. This
+means that PHP’s hashtable implementation has to support an additional mechanism for remembering the order of array
+elements.</p>
+
+<h2 id="the-old-hashtable-implementation">The old hashtable implementation</h2>
+
+<p>I’ll only provide a short overview of the old hashtable implementation here, for a more comprehensive explanation please
+see the <a href="http://www.phpinternalsbook.com/hashtables/basic_structure.html">hashtable chapter</a> of the PHP Internals Book. The following graphic is a very high-level view of
+how a PHP 5 hashtable looks like:</p>
+
+<center><img src="./PHP's new hashtable implementation_files/basic_hashtable.svg" height="265px"></center>
+
+<p>The elements in the “collision resolution” chain are referred to as “buckets”. Every bucket is individually allocated.
+What the image glosses over are the actual values stored in these buckets (only the keys are shown here). Values are
+stored in separately allocated zval structures, which are 16 bytes (32bit) or 24 bytes (64bit) large.</p>
+
+<p>Another thing the image does not show is that the collision resolution list is actually a doubly linked list (which
+simplifies deletion of elements). Next to the collision resolution list, there is another doubly linked list storing the
+order of the array elements. For an array containing the keys <code>"a", "b", "c"</code> in this order, this list could look as
+follows:</p>
+
+<center><img src="./PHP's new hashtable implementation_files/ordered_hashtable.svg" height="255px"></center>
+
+<p>So why was the old hashtable structure so inefficient, both in terms of memory usage and performance? There are a number
+of primary factors:</p>
+
+<ul>
+  <li>Buckets require separate allocations. Allocations are slow and additionally require 8 / 16 bytes of allocation
+overhead. Separate allocations also means that the buckets will be more spread out in memory and as such reduce cache
+efficiency.</li>
+  <li>Zvals also require separate allocations. Again this is slow and incurs allocation header overhead. Furthermore this
+requires us to store a pointer to a zval in each bucket. Because the old implementation was overly generic it
+actually needed not just one, but two pointers for this.</li>
+  <li>The two doubly linked lists require a total of four pointers per bucket. This alone takes up 16 / 32 bytes..
+Furthermore traversing linked lists is a very cache-unfriendly operation.</li>
+</ul>
+
+<p>The new hashtable implementation tries to solve (or at least ameliorate) all of these problems.</p>
+
+<h2 id="the-new-zval-implementation">The new zval implementation</h2>
+
+<p>Before getting to the actual hashtable, I’d like to take a quick look at the new zval structure and highlight how it
+differs from the old one. The <code>zval</code> struct is defined as follows:</p>
+
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">_zval_struct</span> <span class="p">{</span>
+	<span class="n">zend_value</span> <span class="n">value</span><span class="p">;</span>
+	<span class="k">union</span> <span class="p">{</span>
+		<span class="k">struct</span> <span class="p">{</span>
+			<span class="n">ZEND_ENDIAN_LOHI_4</span><span class="p">(</span>
+				<span class="n">zend_uchar</span> <span class="n">type</span><span class="p">,</span>
+				<span class="n">zend_uchar</span> <span class="n">type_flags</span><span class="p">,</span>
+				<span class="n">zend_uchar</span> <span class="n">const_flags</span><span class="p">,</span>
+				<span class="n">zend_uchar</span> <span class="n">reserved</span><span class="p">)</span>
+		<span class="p">}</span> <span class="n">v</span><span class="p">;</span>
+		<span class="kt">uint32_t</span> <span class="n">type_info</span><span class="p">;</span>
+	<span class="p">}</span> <span class="n">u1</span><span class="p">;</span>
+	<span class="k">union</span> <span class="p">{</span>
+		<span class="kt">uint32_t</span> <span class="n">var_flags</span><span class="p">;</span>
+		<span class="kt">uint32_t</span> <span class="n">next</span><span class="p">;</span>       <span class="cm">/* hash collision chain */</span>
+		<span class="kt">uint32_t</span> <span class="n">cache_slot</span><span class="p">;</span> <span class="cm">/* literal cache slot */</span>
+		<span class="kt">uint32_t</span> <span class="n">lineno</span><span class="p">;</span>     <span class="cm">/* line number (for ast nodes) */</span>
+	<span class="p">}</span> <span class="n">u2</span><span class="p">;</span>
+<span class="p">};</span></code></pre></div>
+
+<p>You can safely ignore the <code>ZEND_ENDIAN_LOHI_4</code> macro in this definition - it is only present to ensure a predictable
+memory layout across machines with different endianness.</p>
+
+<p>The zval structure has three parts: The first member is the <code>value</code>. The <code>zend_value</code> union is 8 bytes large and can
+store different kinds of values, including integers, strings, arrays, etc. What is actually stored in there depend on
+the zval type.</p>
+
+<p>The second part is the 4 byte <code>type_info</code>, which consists of the actual <code>type</code> (like <code>IS_STRING</code> or <code>IS_ARRAY</code>), as well
+as a number of additional flags providing information about this type. E.g. if the zval is storing an object, then the
+type flags would say that it is a non-constant, refcounted, garbage-collectible, non-copying type.</p>
+
+<p>The last 4 bytes of the zval structure are normally unused (it’s really just explicit padding, which the compiler would
+introduce automatically otherwise). However in special contexts this space is used to store some extra information. E.g.
+AST nodes use it to store a line number, VM constants use it to store a cache slot index and hashtables use it to store
+the next element in the collision resolution chain - that last part will be important to us.</p>
+
+<p>If you compare this to the previous zval implementation, one difference particularly stands out: The new zval structure
+no longer stores a refcount. The reason behind this, is that the zvals themselves are no longer individually allocated.
+Instead the zval is directly embedded into whatever is storing it (e.g. a hashtable bucket).</p>
+
+<p>While the zvals themselves no longer use refcounting, complex data types like strings, arrays, objects and resources
+still use them. Effectively the new zval design has pushed out the refcount (and information for the cycle-collector)
+from the zval to the array/object/etc. There are a number of advantages to this approach, some of them listed in the
+following:</p>
+
+<ul>
+  <li>Zvals storing simple values (like booleans, integers or floats) no longer require any allocations. So this saves
+the allocation header overhead and improves performance by avoiding unnecessary allocs and frees and improving
+cache locality.</li>
+  <li>Zvals storing simple values don’t need to store a refcount and GC root buffer.</li>
+  <li>We avoid double refcounting. E.g. previously objects both used the zval refcount and an additional object refcount,
+which was necessary to support by-object passing semantics.</li>
+  <li>As all complex values now embed a refcount, they can be shared independently of the zval mechanism. In particular it
+is now also possible to share strings. This is important to the hashtable implementation, as it no longer needs to
+copy non-interned string keys.</li>
+</ul>
+
+<h2 id="the-new-hashtable-implementation">The new hashtable implementation</h2>
+
+<p>With all the preliminaries behind us, we can finally look at the new hashtable implementation used by PHP 7. Lets start
+by looking at the bucket structure:</p>
+
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">_Bucket</span> <span class="p">{</span>
+	<span class="n">zend_ulong</span>        <span class="n">h</span><span class="p">;</span>
+	<span class="n">zend_string</span>      <span class="o">*</span><span class="n">key</span><span class="p">;</span>
+	<span class="n">zval</span>              <span class="n">val</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">Bucket</span><span class="p">;</span></code></pre></div>
+
+<p>A bucket is an entry in the hashtable. It contains pretty much what you would expect: A hash <code>h</code>, a string key <code>key</code> and
+a zval value <code>val</code>. Integer keys are stored in <code>h</code> (the key and hash are identical in this case), in which case the
+<code>key</code> member will be <code>NULL</code>.</p>
+
+<p>As you can see the zval is directly embedded in the bucket structure, so it doesn’t have to be allocated separately and
+we don’t have to pay for allocation overhead.</p>
+
+<p>The main hashtable structure is more interesting:</p>
+
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">_HashTable</span> <span class="p">{</span>
+	<span class="kt">uint32_t</span>          <span class="n">nTableSize</span><span class="p">;</span>
+	<span class="kt">uint32_t</span>          <span class="n">nTableMask</span><span class="p">;</span>
+	<span class="kt">uint32_t</span>          <span class="n">nNumUsed</span><span class="p">;</span>
+	<span class="kt">uint32_t</span>          <span class="n">nNumOfElements</span><span class="p">;</span>
+	<span class="n">zend_long</span>         <span class="n">nNextFreeElement</span><span class="p">;</span>
+	<span class="n">Bucket</span>           <span class="o">*</span><span class="n">arData</span><span class="p">;</span>
+	<span class="kt">uint32_t</span>         <span class="o">*</span><span class="n">arHash</span><span class="p">;</span>
+	<span class="kt">dtor_func_t</span>       <span class="n">pDestructor</span><span class="p">;</span>
+	<span class="kt">uint32_t</span>          <span class="n">nInternalPointer</span><span class="p">;</span>
+	<span class="k">union</span> <span class="p">{</span>
+		<span class="k">struct</span> <span class="p">{</span>
+			<span class="n">ZEND_ENDIAN_LOHI_3</span><span class="p">(</span>
+				<span class="n">zend_uchar</span>    <span class="n">flags</span><span class="p">,</span>
+				<span class="n">zend_uchar</span>    <span class="n">nApplyCount</span><span class="p">,</span>
+				<span class="kt">uint16_t</span>      <span class="n">reserve</span><span class="p">)</span>
+		<span class="p">}</span> <span class="n">v</span><span class="p">;</span>
+		<span class="kt">uint32_t</span> <span class="n">flags</span><span class="p">;</span>
+	<span class="p">}</span> <span class="n">u</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">HashTable</span><span class="p">;</span></code></pre></div>
+
+<p>The buckets (= array elements) are stored in the <code>arData</code> array. This array is allocated in powers of two, with the
+size being stored in <code>nTableSize</code> (the minimum value is 8). The actual number of stored elements is <code>nNumOfElements</code>.
+Note that this array directly contains the <code>Bucket</code> structures. Previously we used an array of pointers to separately
+allocated buckets, which means that we needed more alloc/frees, had to pay allocation overhead and also had to pay for
+the extra pointer.</p>
+
+<h2 id="order-of-elements">Order of elements</h2>
+
+<p>The <code>arData</code> array stores the elements in order of insertion. So the first array element will be stored in <code>arData[0]</code>,
+the second in <code>arData[1]</code> etc. This does not in any way depend on the used key, only the order of insertion matters
+here.</p>
+
+<p>So if you store five elements in the hashtable, slots <code>arData[0]</code> to <code>arData[4]</code> will be used and the next free slot is
+<code>arData[5]</code>. We remember this number in <code>nNumUsed</code>. You may wonder: Why do we store this separately, isn’t it the same
+as <code>nNumOfElements</code>?</p>
+
+<p>It is, but only as long as only insertion operations are performed. If an element is deleted from a hashtable, we
+obviously don’t want to move all elements in <code>arData</code> that occur after the deleted element in order to have a continuous
+array again. Instead we simply mark the deleted value with an <code>IS_UNDEF</code> zval type.</p>
+
+<p>As an example, consider the following code:</p>
+
+<div class="highlight"><pre><code class="language-php" data-lang="php"><span class="nv">$array</span> <span class="o">=</span> <span class="p">[</span>
+	<span class="s1">'foo'</span> <span class="o">=&gt;</span> <span class="mi">0</span><span class="p">,</span>
+	<span class="s1">'bar'</span> <span class="o">=&gt;</span> <span class="mi">1</span><span class="p">,</span>
+	<span class="mi">0</span>     <span class="o">=&gt;</span> <span class="mi">2</span><span class="p">,</span>
+	<span class="s1">'xyz'</span> <span class="o">=&gt;</span> <span class="mi">3</span><span class="p">,</span>
+	<span class="mi">2</span>     <span class="o">=&gt;</span> <span class="mi">4</span>
+<span class="p">];</span>
+<span class="nb">unset</span><span class="p">(</span><span class="nv">$array</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="nb">unset</span><span class="p">(</span><span class="nv">$array</span><span class="p">[</span><span class="s1">'xyz'</span><span class="p">]);</span></code></pre></div>
+
+<p>This will result in the following <code>arData</code> structure:</p>
+
+<pre><code>nTableSize     = 8
+nNumOfElements = 3
+nNumUsed       = 5
+
+[0]: key="foo", val=int(0)
+[1]: key="bar", val=int(1)
+[2]: val=UNDEF
+[3]: val=UNDEF
+[4]: h=2, val=int(4)
+[5]: NOT INITIALIZED
+[6]: NOT INITIALIZED
+[7]: NOT INITIALIZED
+</code></pre>
+
+<p>As you can see the first five <code>arData</code> elements have been used, but elements at position 2 (key <code>0</code>) and 3 (key <code>'xyz'</code>)
+have been replaced with an <code>IS_UNDEF</code> tombstone, because they were <code>unset</code>. These elements will just remain wasted
+memory for now. However, once <code>nNumUsed</code> reaches <code>nTableSize</code> PHP will try compact the <code>arData</code> array, by dropping any
+<code>UNDEF</code> entries that have been added along the way. Only if all buckets really contain a value the <code>arData</code> will be
+reallocated to twice the size.</p>
+
+<p>The new way of maintaining array order has several advantages over the doubly linked list that was used in PHP 5.x. One
+obvious advantage is that we save two pointers per bucket, which corresponds to 8/16 bytes. Additionally it means that
+iterating an array looks roughly as follows:</p>
+
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">uint32_t</span> <span class="n">i</span><span class="p">;</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">ht</span><span class="o">-&gt;</span><span class="n">nNumUsed</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">Bucket</span> <span class="o">*</span><span class="n">b</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ht</span><span class="o">-&gt;</span><span class="n">arData</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">Z_ISUNDEF</span><span class="p">(</span><span class="n">b</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">))</span> <span class="k">continue</span><span class="p">;</span>
+
+	<span class="c1">// do stuff with bucket</span>
+<span class="p">}</span></code></pre></div>
+
+<p>This corresponds to a linear scan of memory, which is much more cache-efficient than a linked list traversal (where you
+go back and forth between relatively random memory addresses).</p>
+
+<p>One problem with the current implementation is that <code>arData</code> never shrinks (unless explicitly told to). So if you
+create an array with a few million elements and remove them afterwards, the array will still take a lot of memory. We
+should probably half the <code>arData</code> size if utilization falls below a certain level.</p>
+
+<h2 id="hashtable-lookup">Hashtable lookup</h2>
+
+<p>Until now we have only discussed how PHP arrays represent order. The actual hashtable lookup uses the second <code>arHash</code>
+array, which consists of <code>uint32_t</code> values. The <code>arHash</code> array has the same size (<code>nTableSize</code>) as <code>arData</code> and both
+are actually allocated as one chunk of memory.</p>
+
+<p>The hash returned from the hashing function (DJBX33A for string keys) is a 32-bit or 64-bit unsigned integer, which is
+too large to directly use as an index into the hash array. We first need to adjust it to the table size using a modulus
+operation. Instead of <code>hash % ht-&gt;nTableSize</code> we use <code>hash &amp; (ht-&gt;nTableSize - 1)</code>, which is the same if the size is a
+power of two, but doesn’t require expensive integer division. The value <code>ht-&gt;nTableSize - 1</code> is stored in
+<code>ht-&gt;nTableMask</code>.</p>
+
+<p>Next, we look up the index <code>idx = ht-&gt;arHash[hash &amp; ht-&gt;nTableMask]</code> in the hash array. This index corresponds to the
+head of the collision resolution list. So <code>ht-&gt;arData[idx]</code> is the first entry we have to examine. If the key stored
+there matches the one we’re looking for, we’re done.</p>
+
+<p>Otherwise we must continue to the next element in the collision resolution list. The index to this element is stored in
+<code>bucket-&gt;val.u2.next</code>, which are the normally unused last four bytes of the <code>zval</code> structure that get a special meaning
+in this context. We continue traversing this linked list (which uses indexes instead of pointers) until we either find
+the right bucket or hit an <code>INVALID_IDX</code> - which means that an element with the given key does not exist.</p>
+
+<p>In code, the lookup mechanism looks like this:</p>
+
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="n">zend_ulong</span> <span class="n">h</span> <span class="o">=</span> <span class="n">zend_string_hash_val</span><span class="p">(</span><span class="n">key</span><span class="p">);</span>
+<span class="kt">uint32_t</span> <span class="n">idx</span> <span class="o">=</span> <span class="n">ht</span><span class="o">-&gt;</span><span class="n">arHash</span><span class="p">[</span><span class="n">h</span> <span class="o">&amp;</span> <span class="n">ht</span><span class="o">-&gt;</span><span class="n">nTableMask</span><span class="p">];</span>
+<span class="k">while</span> <span class="p">(</span><span class="n">idx</span> <span class="o">!=</span> <span class="n">INVALID_IDX</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">Bucket</span> <span class="o">*</span><span class="n">b</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ht</span><span class="o">-&gt;</span><span class="n">arData</span><span class="p">[</span><span class="n">idx</span><span class="p">];</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">b</span><span class="o">-&gt;</span><span class="n">h</span> <span class="o">==</span> <span class="n">h</span> <span class="o">&amp;&amp;</span> <span class="n">zend_string_equals</span><span class="p">(</span><span class="n">b</span><span class="o">-&gt;</span><span class="n">key</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">b</span><span class="p">;</span>
+	<span class="p">}</span>
+	<span class="n">idx</span> <span class="o">=</span> <span class="n">Z_NEXT</span><span class="p">(</span><span class="n">b</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">);</span> <span class="c1">// b-&gt;val.u2.next</span>
+<span class="p">}</span>
+<span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span></code></pre></div>
+
+<p>Lets consider how this approach improves over the previous implementation: In PHP 5.x the collision resolution used a
+doubly linked pointer list. Using <code>uint32_t</code> indices instead of pointers is better, because they take half the size on
+64bit systems. Additionally fitting in 4 bytes means that we can embed the “next” link into the unused zval slot, so we
+essentially get it for free.</p>
+
+<p>We also use a singly linked list now, there is no “prev” link anymore. The prev link is primarily useful for deleting
+elements, because you have to adjust the “next” link of the “prev” element when you perform a deletion. However, if the
+deletion happens by key, you already know the previous element as a result of traversing the collision resolution list.</p>
+
+<p>The few cases where deletion occurs in some other context (e.g. “delete the element the iterator is currently at”) will
+have to traverse the collision list to find the previous element. But as this is a rather unimportant scenario, we
+prefer saving memory over saving a list traversal for that case.</p>
+
+<h2 id="packed-hashtables">Packed hashtables</h2>
+
+<p>PHP uses hashtables for all arrays. However in the rather common case of continuous, integer-indexed arrays (i.e. <em>real</em>
+arrays) the whole hashing thing doesn’t make much sense. This is why PHP 7 introduces the concept of “packed
+hashtables”.</p>
+
+<p>In packed hashtables the <code>arHash</code> array is <code>NULL</code> and lookups will directly index into <code>arData</code>. If you’re looking for
+the key <code>5</code> then the element will be located at <code>arData[5]</code> or it doesn’t exist at all. There is no need to traverse a
+collision resolution list.</p>
+
+<p>Note that even for integer indexed arrays PHP has to maintain order. The arrays <code>[0 =&gt; 1, 1 =&gt; 2]</code> and
+<code>[1 =&gt; 2, 0 =&gt; 1]</code> are not the same. The packed hashtable optimization only works if keys are in ascending order. There
+can be gaps in between them (the keys don’t have to be continuous), but they need to always increase. So if elements are
+inserted into an array in a “wrong” order (e.g. in reverse) the packed hashtable optimization will not be used.</p>
+
+<p>Note furthermore that packed hashtables still store a lot of useless information. For example we can determine the index
+of a bucket based on its memory address, so <code>bucket-&gt;h</code> is redundant. The value <code>bucket-&gt;key</code> will always be <code>NULL</code>, so
+it’s just wasted memory as well.</p>
+
+<p>We keep these useless values around so that buckets always have the same structure, independently of whether or not
+packing is used. This means that iteration can always use the same code. However we might switch to a “fully packed”
+structure in the future, where a pure zval array is used if possible.</p>
+
+<h2 id="empty-hashtables">Empty hashtables</h2>
+
+<p>Empty hashtables get a bit of special treating both in PHP 5.x and PHP 7. If you create an empty array <code>[]</code> chances are
+pretty good that you won’t actually insert any elements into it. As such the <code>arData</code>/<code>arHash</code> arrays will only be
+allocated when the first element is inserted into the hashtable.</p>
+
+<p>To avoid checking for this special case in many places, a small trick is used: While the <code>nTableSize</code> is set to either
+the hinted size or the default value of 8, the <code>nTableMask</code> (which is usually <code>nTableSize - 1</code>) is set to zero. This
+means that <code>hash &amp; ht-&gt;nTableMask</code> will always result in the value zero as well.</p>
+
+<p>So the <code>arHash</code> array for this case only needs to have one element (with index zero) that contains an <code>INVALID_IDX</code>
+value (this special array is called <code>uninitialized_bucket</code> and is allocated statically). When a lookup is performed,
+we always find the <code>INVALID_IDX</code> value, which means that the key has not been found (which is exactly what you want for
+an empty table).</p>
+
+<h2 id="memory-utilization">Memory utilization</h2>
+
+<p>This should cover the most important aspects of the PHP 7 hashtable implementation. First lets summarize why the new
+implementation uses less memory. I’ll only use the numbers for 64bit systems here and only look at the per-element size,
+ignoring the main <code>HashTable</code> structure (which is less significant asymptotically).</p>
+
+<p>In PHP 5.x a whopping 144 bytes per element were required. In PHP 7 the value is down to 36 bytes, or 32 bytes for the
+packed case. Here’s where the difference comes from:</p>
+
+<ul>
+  <li>Zvals are not individually allocated, so we save 16 bytes allocation overhead.</li>
+  <li>Buckets are not individually allocated, so we save another 16 bytes of allocation overhead.</li>
+  <li>Zvals are 16 bytes smaller for simple values.</li>
+  <li>Keeping order no longer needs 16 bytes for a doubly linked list, instead the order is implicit.</li>
+  <li>The collision list is now singly linked, which saves 8 bytes. Furthermore it’s now an index list and the index is
+embedded into the zval, so effectively we save another 8 bytes.</li>
+  <li>As the zval is embedded into the bucket, we no longer need to store a pointer to it. Due to details of the previous
+implementation we actually save two pointers, so that’s another 16 bytes.</li>
+  <li>The length of the key is no longer stored in the bucket, which is another 8 bytes. However, if the key is actually a
+string and not an integer, the length still has to be stored in the <code>zend_string</code> structure. The exact memory
+impact in this case is hard to quantify, because <code>zend_string</code> structures are shared, whereas previously hashtables
+had to copy the string if it wasn’t interned.</li>
+  <li>The array containing the collision list heads is now index based, so saves 4 bytes per element. For packed arrays it
+is not necessary at all, in which case we save another 4 bytes.</li>
+</ul>
+
+<p>However it should be clearly said that this summary is making things look better than they really are in several
+respects. First of all, the new hashtable implementation uses a lot more embedded (as opposed to separately allocated)
+structures. How can this negatively affect things?</p>
+
+<p>If you look at the actually measured numbers at the start of this article, you’ll find that on 64bit PHP 7 an array with
+100000 elements took 4.00 MiB of memory. In this case we’re dealing with a packed array, so we would actually expect
+32 * 100000 = 3.05 MiB memory utilization. The reason behind this is that we allocate everything in powers of two. The
+<code>nTableSize</code> will be 2^17 = 131072 in this case, so we’ll allocate 32 * 131072 bytes of memory (which is 4.00 MiB).</p>
+
+<p>Of course the previous hashtable implementation also used power of two allocations. However it only allocated an array
+with bucket pointers in this way (where each pointer is 8 bytes). Everything else was allocated on demand. So in PHP 7
+we loose 32 * 31072 (0.95 MiB) in unused memory, while in PHP 5.x we only waste 8 * 31072 (0.24 MiB).</p>
+
+<p>Another thing to consider is what happens if not all values stored in the array are distinct. For simplicity lets assume
+that all values in the array are identical. So lets replace the <code>range</code> in the starting example with an <code>array_fill</code>:</p>
+
+<div class="highlight"><pre><code class="language-php" data-lang="php"><span class="nv">$startMemory</span> <span class="o">=</span> <span class="nb">memory_get_usage</span><span class="p">();</span>
+<span class="nv">$array</span> <span class="o">=</span> <span class="nb">array_fill</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100000</span><span class="p">,</span> <span class="mi">42</span><span class="p">);</span>
+<span class="k">echo</span> <span class="nb">memory_get_usage</span><span class="p">()</span> <span class="o">-</span> <span class="nv">$startMemory</span><span class="p">,</span> <span class="s2">" bytes</span><span class="se">\n</span><span class="s2">"</span><span class="p">;</span></code></pre></div>
+
+<p>This script results in the following numbers:</p>
+
+<pre><code>        |   32 bit |    64 bit
+------------------------------
+PHP 5.6 | 4.70 MiB |  9.39 MiB
+------------------------------
+PHP 7.0 | 3.00 MiB |  4.00 MiB
+</code></pre>
+
+<p>As you can see the memory usage on PHP 7 stays the same as in the <code>range</code> case. There is no reason why it would change,
+as all zvals are separate. On PHP 5.x on the other hand the memory usage is now significantly lower, because only one
+zval is used for all values. So while we’re still a good bit better off on PHP 7, the difference is smaller now.</p>
+
+<p>Things become even more complicated once we consider string keys (which may or not be shared or interned) and complex
+values. The point being that arrays in PHP 7 will take significantly less memory than in PHP 5.x, but the numbers from
+the introduction are likely too optimistic in many cases.</p>
+
+<h2 id="performance">Performance</h2>
+
+<p>I’ve already talked a lot about memory usage, so lets move to the next point, namely performance. In the end, the goal
+of the phpng project wasn’t to improve memory usage, but to improve performance. The memory utilization improvement is
+only a means to an end, in that less memory results in better CPU cache utilization, resulting in better performance.</p>
+
+<p>However there are of course a number of other reasons why the new implementation is faster: First of all we need less
+allocations. Depending on whether or not values are shared we save two allocations per element. Allocations being rather
+expensive operations this is quite significant.</p>
+
+<p>Array iteration in particular is now more cache-friendly, because it’s now a linear memory traversal, instead of a
+random-access linked list traversal.</p>
+
+<p>There’s probably a lot more to be said on the topic of performance, but the main interest in this article was memory
+usage, so I won’t go into further detail here.</p>
+
+<h2 id="closing-thoughts">Closing thoughts</h2>
+
+<p>PHP 7 undoubtedly has made a big step forward as far as the hashtable implementation is concerned. A lot of useless
+overhead is gone now.</p>
+
+<p>So the question is: where we can go from here? One idea I already mentioned is to use “fully packed” hashes for the
+case of increasing integer keys. This would mean using a plain zval array, which is the best we can do without starting
+to specialize uniformly typed arrays.</p>
+
+<p>There’s probably some other directions one could go as well. For example switching from collision-chaining to open
+addressing (e.g. using Robin Hood probing), could be better both in terms of memory usage (no collision resolution list)
+and performance (better cache efficiency, depending on the details of the probing algorithm). However open-addressing is
+relatively hard to combine with the ordering requirement, so this may not be possible to do in a reasonable way.</p>
+
+<p>Another idea is to combine the <code>h</code> and <code>key</code> fields in the bucket structure. Integer keys only use <code>h</code> and string keys
+already store the hash in <code>key</code> as well. However this would likely have an adverse impact on performance, because
+fetching the hash will require an additional memory indirection.</p>
+
+<p>One last thing that I wish to mention is that PHP 7 improved not only the internal representation of hashtables, but
+also the API used to work them. I’ve regularly had to look up how even simple operations like <code>zend_hash_find</code> had to be
+used, especially regarding how many levels of indirection are required (hint: three). In PHP 7 you just write
+<code>zend_hash_find(ht, key)</code> and get back a <code>zval*</code>. Generally I find that writing extensions for PHP 7 has become quite a
+bit more pleasant.</p>
+
+<p>Hopefully I was able to provide you some insight into the internals of PHP 7 hashtables. Maybe I’ll write a followup
+article focusing on zvals. I’ve already touched on some of the difference in this post, but there’s a lot more to be
+said on the topic.</p>
+
+
+    </section>
+    <footer>
+        <section class="followupActions">
+            If you liked this article, you may want to <a href="https://nikic.github.io/">browse my other articles</a> or
+            <a href="https://twitter.com/#!/nikita_ppv">follow me on Twitter</a>.
+        </section>
+        <div id="disqus_thread"><iframe id="dsq-app1" name="dsq-app1" allowtransparency="true" frameborder="0" scrolling="no" tabindex="0" title="Disqus" width="100%" src="./PHP's new hashtable implementation_files/saved_resource.html" style="width: 100% !important; border: none !important; overflow: hidden !important; height: 4697px !important;" horizontalscrolling="no" verticalscrolling="no"></iframe></div>
+        <script type="text/javascript">
+            var disqus_shortname = 'nikic';
+            var disqus_url = 'https://nikic.github.io/2014/12/22/PHPs-new-hashtable-implementation.html';
+            var disqus_identifier = '/2014/12/22/PHPs-new-hashtable-implementation.html';
+            (function() {
+                var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+            })();
+        </script>
+        
+    </footer>
+</section>
+
+        </section>
+    
+
+</body></html>
