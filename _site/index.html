@@ -19,8 +19,8 @@
   <link rel="stylesheet" href="/public/css/lanyon.css">
   <link rel="stylesheet" href="/public/css/highlight.css">
   <!--<link rel="stylesheet" href="/public/css/pygments.css">-->
-  <link rel="stylesheet" href="/public/css/font-awesome.min.css">
   <!--<link rel="stylesheet" href="/public/css/rouge.css">-->
+  <link rel="stylesheet" href="/public/css/font-awesome.min.css">
   <!-- <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700|PT+Sans:400"> -->
 
   <!-- Icons -->
@@ -125,7 +125,7 @@
 <h3 id="section-1">代码复现</h3>
 
 <pre><code class="language-php">    $message1 = '点击网址 马上报名！';
-    $message2 = '点击网址 马上报名！';//wrong
+    $message2 = '点击网址 马上报名！';//\u00a0
     var_dump(json_encode($message1));
     var_dump(json_encode($message2));
 </code></pre>
@@ -209,7 +209,7 @@
         
       <h1 class="post-title">
         <a class="post-title-home" href="/%E6%9D%82%E8%AE%B0/2015/11/05/%E6%8C%81%E7%BB%AD%E5%AD%A6%E4%B9%A0/">
-          持续学习
+          坚持
         </a>
       </h1>
         <p class="post-info">
@@ -224,8 +224,8 @@
         <span class="post-info"><a href="/tag/index.html#"></a></span>
     </div>
     <div class="post-content">
-      <p>###持续学习
-不写博客的程序员不是好码农，希望能坚持下来!</p>
+      <h3 id="section">持续学习</h3>
+<p>不写博客的程序员不是好码农，坚持!</p>
 
       <div class="readmore">
         <a href="/%E6%9D%82%E8%AE%B0/2015/11/05/%E6%8C%81%E7%BB%AD%E5%AD%A6%E4%B9%A0/"><i class="fa fa-hand-o-right"></i>&nbsp阅读全文</a>

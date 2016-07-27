@@ -19,8 +19,8 @@
   <link rel="stylesheet" href="/public/css/lanyon.css">
   <link rel="stylesheet" href="/public/css/highlight.css">
   <!--<link rel="stylesheet" href="/public/css/pygments.css">-->
-  <link rel="stylesheet" href="/public/css/font-awesome.min.css">
   <!--<link rel="stylesheet" href="/public/css/rouge.css">-->
+  <link rel="stylesheet" href="/public/css/font-awesome.min.css">
   <!-- <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700|PT+Sans:400"> -->
 
   <!-- Icons -->
@@ -121,7 +121,7 @@
 <h3 id="section-1">代码复现</h3>
 
 <pre><code class="language-php">    $message1 = '点击网址 马上报名！';
-    $message2 = '点击网址 马上报名！';//wrong
+    $message2 = '点击网址 马上报名！';//\u00a0
     var_dump(json_encode($message1));
     var_dump(json_encode($message2));
 </code></pre>
@@ -162,7 +162,7 @@
       <li>
         <h3>
           <a href="/%E6%9D%82%E8%AE%B0/2015/11/05/%E6%8C%81%E7%BB%AD%E5%AD%A6%E4%B9%A0/">
-            持续学习
+            坚持
             <small>05 Nov 2015</small>
           </a>
         </h3>
