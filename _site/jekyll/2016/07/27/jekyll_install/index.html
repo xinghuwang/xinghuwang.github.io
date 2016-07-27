@@ -17,8 +17,8 @@
   <!-- CSS -->
   <!-- <link rel="stylesheet" href="/public/css/syntax.css"> -->
   <link rel="stylesheet" href="/public/css/lanyon.css">
-  <!--<link rel="stylesheet" href="/public/css/highlight.css">-->
-  <link rel="stylesheet" href="/public/css/pygments.css">
+  <link rel="stylesheet" href="/public/css/highlight.css">
+  <!--<link rel="stylesheet" href="/public/css/pygments.css">-->
   <link rel="stylesheet" href="/public/css/font-awesome.min.css">
   <!--<link rel="stylesheet" href="/public/css/rouge.css">-->
   <!-- <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700|PT+Sans:400"> -->
@@ -35,7 +35,8 @@
 
   <!-- audioplayer -->
   <script src="/public/js/jquery-1.11.1.js"></script>
-  <!--<script src="/public/js/highlight.js"></script>-->
+  <script src="/public/js/highlight.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
   <!-- <script src="/public/js/audioplayer/amazingaudioplayer.js"></script> -->
   <!-- <link rel="stylesheet" type="text/css" href="/public/css/audioplayer/initaudioplayer-1.css"> -->
 
@@ -114,29 +115,26 @@
       <span class="post-info">&nbsp<a href="/tag/index.html#"></a></span>
   </div>
   <div class="post-content">
-    <h3>jekyll install</h3>
+    <h3 id="jekyll-install">jekyll install</h3>
 
 <ul>
-<li>install ruby</li>
-<li>install jekyll
-
-<ul>
-<li>gem install jekyll</li>
-<li>gem install jekyll-paginate</li>
-<li>gem install rdiscount</li>
-<li>gem install rouge</li>
-<li>rougify style monokai.sublime > rouge.css</li>
+  <li>install ruby</li>
+  <li>install jekyll
+    <ul>
+      <li>gem install jekyll</li>
+      <li>gem install jekyll-paginate</li>
+      <li>gem install rdiscount</li>
+      <li>gem install rouge</li>
+      <li>rougify style monokai.sublime &gt; rouge.css</li>
+    </ul>
+  </li>
+  <li>start server
+    <ul>
+      <li>jekyll build</li>
+      <li>jekyll serve</li>
+    </ul>
+  </li>
 </ul>
-</li>
-<li>start server
-
-<ul>
-<li>jekyll build</li>
-<li>jekyll serve</li>
-</ul>
-</li>
-</ul>
-
     
   </div>
 </div>

@@ -17,8 +17,8 @@
   <!-- CSS -->
   <!-- <link rel="stylesheet" href="/public/css/syntax.css"> -->
   <link rel="stylesheet" href="/public/css/lanyon.css">
-  <!--<link rel="stylesheet" href="/public/css/highlight.css">-->
-  <link rel="stylesheet" href="/public/css/pygments.css">
+  <link rel="stylesheet" href="/public/css/highlight.css">
+  <!--<link rel="stylesheet" href="/public/css/pygments.css">-->
   <link rel="stylesheet" href="/public/css/font-awesome.min.css">
   <!--<link rel="stylesheet" href="/public/css/rouge.css">-->
   <!-- <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700|PT+Sans:400"> -->
@@ -35,7 +35,8 @@
 
   <!-- audioplayer -->
   <script src="/public/js/jquery-1.11.1.js"></script>
-  <!--<script src="/public/js/highlight.js"></script>-->
+  <script src="/public/js/highlight.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
   <!-- <script src="/public/js/audioplayer/amazingaudioplayer.js"></script> -->
   <!-- <link rel="stylesheet" type="text/css" href="/public/css/audioplayer/initaudioplayer-1.css"> -->
 
@@ -118,32 +119,29 @@
         <span class="post-info"><a href="/tag/index.html#"></a></span>
     </div>
     <div class="post-content">
-      <h3>现象</h3>
-
+      <h3 id="section">现象</h3>
 <p>有一个发短信的服务，在手机上收到的内容和预期的不一致，空格变成了？。查看数据库和日志都是正常的显示空格。怀疑是字符编码问题，因为数据库和应用的字符集都是utf-8，调用第三方短信通道时被要求转为GBK，既然有思路就上代码复现。</p>
 
-<h3>代码复现</h3>
+<h3 id="section-1">代码复现</h3>
 
-<pre><code class="php">    $message1 = '点击网址 马上报名！';
+<pre><code class="language-c">    $message1 = '点击网址 马上报名！';
     $message2 = '点击网址 马上报名！';//wrong
     var_dump(json_encode($message1));
     var_dump(json_encode($message2));
 </code></pre>
 
-<p>输出如下：</p>
-
-<blockquote><p>string(57) ""\u70b9\u51fb\u7f51\u5740 \u9a6c\u4e0a\u62a5\u540d\uff01""</p>
-
-<p>string(62) ""\u70b9\u51fb\u7f51\u5740\u00a0\u9a6c\u4e0a\u62a5\u540d\uff01""</p></blockquote>
+<p>输出如下：
+&gt; string(57) ““\u70b9\u51fb\u7f51\u5740 \u9a6c\u4e0a\u62a5\u540d\uff01””
+&gt;
+&gt; string(62) ““\u70b9\u51fb\u7f51\u5740\u00a0\u9a6c\u4e0a\u62a5\u540d\uff01””</p>
 
 <p>发现<code>message2</code>里的空格的<strong>unicode</strong>字符是<strong>\u00a0</strong>，而<strong>GBK</strong>编码中不存在这个字符。
 <strong>\u00a0</strong>被称为不间断空格<strong>NO-BREAK SPACE</strong>，常见于html中。</p>
 
-<h3>解决</h3>
-
+<h3 id="section-2">解决</h3>
 <p>既然GBK不识别，就需要过滤掉这种非法字符</p>
 
-<pre><code class="php">    $content = str_replace(chr(194) . chr(160), " ", $content);
+<pre><code class="language-php">    $content = str_replace(chr(194) . chr(160), " ", $content);
 </code></pre>
 
       <div class="readmore">
@@ -174,29 +172,26 @@
         <span class="post-info"><a href="/tag/index.html#"></a></span>
     </div>
     <div class="post-content">
-      <h3>jekyll install</h3>
+      <h3 id="jekyll-install">jekyll install</h3>
 
 <ul>
-<li>install ruby</li>
-<li>install jekyll
-
-<ul>
-<li>gem install jekyll</li>
-<li>gem install jekyll-paginate</li>
-<li>gem install rdiscount</li>
-<li>gem install rouge</li>
-<li>rougify style monokai.sublime > rouge.css</li>
+  <li>install ruby</li>
+  <li>install jekyll
+    <ul>
+      <li>gem install jekyll</li>
+      <li>gem install jekyll-paginate</li>
+      <li>gem install rdiscount</li>
+      <li>gem install rouge</li>
+      <li>rougify style monokai.sublime &gt; rouge.css</li>
+    </ul>
+  </li>
+  <li>start server
+    <ul>
+      <li>jekyll build</li>
+      <li>jekyll serve</li>
+    </ul>
+  </li>
 </ul>
-</li>
-<li>start server
-
-<ul>
-<li>jekyll build</li>
-<li>jekyll serve</li>
-</ul>
-</li>
-</ul>
-
 
       <div class="readmore">
         <a href="/jekyll/2016/07/27/jekyll_install/"><i class="fa fa-hand-o-right"></i>&nbsp阅读全文</a>
@@ -226,9 +221,8 @@
         <span class="post-info"><a href="/tag/index.html#"></a></span>
     </div>
     <div class="post-content">
-      <h3>持续学习</h3>
-
-<p>不写博客的程序员不是好码农，希望能坚持下来!</p>
+      <p>###持续学习
+不写博客的程序员不是好码农，希望能坚持下来!</p>
 
       <div class="readmore">
         <a href="/%E6%9D%82%E8%AE%B0/2015/11/05/%E6%8C%81%E7%BB%AD%E5%AD%A6%E4%B9%A0/"><i class="fa fa-hand-o-right"></i>&nbsp阅读全文</a>
