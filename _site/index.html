@@ -124,16 +124,19 @@
 
 <h3 id="section-1">代码复现</h3>
 
-<pre><code class="language-c">    $message1 = '点击网址 马上报名！';
+<pre><code class="language-php">    $message1 = '点击网址 马上报名！';
     $message2 = '点击网址 马上报名！';//wrong
     var_dump(json_encode($message1));
     var_dump(json_encode($message2));
 </code></pre>
 
-<p>输出如下：
-&gt; string(57) ““\u70b9\u51fb\u7f51\u5740 \u9a6c\u4e0a\u62a5\u540d\uff01””
-&gt;
-&gt; string(62) ““\u70b9\u51fb\u7f51\u5740\u00a0\u9a6c\u4e0a\u62a5\u540d\uff01””</p>
+<p>输出如下：</p>
+
+<blockquote>
+  <p>string(57) ““\u70b9\u51fb\u7f51\u5740 \u9a6c\u4e0a\u62a5\u540d\uff01””</p>
+
+  <p>string(62) ““\u70b9\u51fb\u7f51\u5740\u00a0\u9a6c\u4e0a\u62a5\u540d\uff01””</p>
+</blockquote>
 
 <p>发现<code>message2</code>里的空格的<strong>unicode</strong>字符是<strong>\u00a0</strong>，而<strong>GBK</strong>编码中不存在这个字符。
 <strong>\u00a0</strong>被称为不间断空格<strong>NO-BREAK SPACE</strong>，常见于html中。</p>
