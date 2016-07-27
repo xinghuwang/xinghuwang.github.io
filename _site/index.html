@@ -67,7 +67,7 @@
 
   <div class="sidebar-item">
     <p>
-      &copy; 2015. All rights reserved.
+      &copy; 2016. All rights reserved.
     </p>
   </div>
 </div>
@@ -92,6 +92,111 @@
 
       <div class="container content">
         <div class="posts">
+  
+  <div class="post">
+    <div class="post-heading">
+        
+          <img src="/public/img/wangxinghu.jpg">
+        
+      <h1 class="post-title">
+        <a class="post-title-home" href="/php/2016/07/27/php%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E9%97%AE%E9%A2%98/">
+          \u00a0编码问题
+        </a>
+      </h1>
+        <p class="post-info">
+        
+          wangxinghu原创
+        
+        </p>
+        <span class="post-info"><i class="fa fa-calendar"></i>&nbsp2016/07/27  </span>
+        <span class="post-info"><i class="fa fa-book"></i>&nbsp<a href="/category/index.html#php">php</a></span>
+        <span class="post-info"><i class="fa fa-tags"></i>&nbsp<a href="/tag/index.html#php">php</a></span>  
+        <span class="post-info"><a href="/tag/index.html#编码">编码</a></span>
+        <span class="post-info"><a href="/tag/index.html#"></a></span>
+    </div>
+    <div class="post-content">
+      <h3>现象</h3>
+
+<p>有一个发短信的服务，在手机上收到的内容和预期的不一致，空格变成了？。查看数据库和日志都是正常的显示空格。怀疑是字符编码问题，因为数据库和应用的字符集都是utf-8，调用第三方短信通道时被要求转为GBK，既然有思路就上代码复现。</p>
+
+<h3>代码复现</h3>
+
+<pre><code class="php">    $message1 = '点击网址 马上报名！';
+    $message2 = '点击网址 马上报名！';//wrong
+    var_dump(json_encode($message1));
+    var_dump(json_encode($message2));
+</code></pre>
+
+<p>输出如下：</p>
+
+<blockquote><p>string(57) ""\u70b9\u51fb\u7f51\u5740 \u9a6c\u4e0a\u62a5\u540d\uff01""</p>
+
+<p>string(62) ""\u70b9\u51fb\u7f51\u5740\u00a0\u9a6c\u4e0a\u62a5\u540d\uff01""</p></blockquote>
+
+<p>发现<code>message2</code>里的空格的<strong>unicode</strong>字符是<strong>\u00a0</strong>，而<strong>GBK</strong>编码中不存在这个字符。
+<strong>\u00a0</strong>被称为不间断空格<strong>NO-BREAK SPACE</strong>，常见于html中。</p>
+
+<h3>解决</h3>
+
+<p>既然GBK不识别，就需要过滤掉这种非法字符</p>
+
+<pre><code class="php">    $content = str_replace(chr(194) . chr(160), " ", $content);
+</code></pre>
+
+      <div class="readmore">
+        <a href="/php/2016/07/27/php%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E9%97%AE%E9%A2%98/"><i class="fa fa-hand-o-right"></i>&nbsp阅读全文</a>
+      </div>
+    </div>
+  </div>
+  
+  <div class="post">
+    <div class="post-heading">
+        
+          <img src="/public/img/wangxinghu.jpg">
+        
+      <h1 class="post-title">
+        <a class="post-title-home" href="/jekyll/2016/07/27/jekyll_install/">
+          jekyll
+        </a>
+      </h1>
+        <p class="post-info">
+        
+          wangxinghu原创
+        
+        </p>
+        <span class="post-info"><i class="fa fa-calendar"></i>&nbsp2016/07/27  </span>
+        <span class="post-info"><i class="fa fa-book"></i>&nbsp<a href="/category/index.html#jekyll">jekyll</a></span>
+        <span class="post-info"><i class="fa fa-tags"></i>&nbsp<a href="/tag/index.html#学习">学习</a></span>  
+        <span class="post-info"><a href="/tag/index.html#"></a></span>
+        <span class="post-info"><a href="/tag/index.html#"></a></span>
+    </div>
+    <div class="post-content">
+      <h3>jekyll install</h3>
+
+<ul>
+<li>install ruby</li>
+<li>install jekyll
+
+<ul>
+<li>gem install jekyll</li>
+<li>gem install jekyll-paginate</li>
+<li>gem install rdiscount</li>
+</ul>
+</li>
+<li>start server
+
+<ul>
+<li>jekyll serve</li>
+</ul>
+</li>
+</ul>
+
+
+      <div class="readmore">
+        <a href="/jekyll/2016/07/27/jekyll_install/"><i class="fa fa-hand-o-right"></i>&nbsp阅读全文</a>
+      </div>
+    </div>
+  </div>
   
   <div class="post">
     <div class="post-heading">
@@ -143,7 +248,7 @@
     
     <label for="sidebar-checkbox" class="sidebar-toggle"></label>
     <div class="footer">
-  <p>  Copyright © 2015 - <a href="/">tiger</a> - Powered by 
+  <p>  Copyright © 2016 - <a href="/">tiger</a> - Powered by 
     <a href="http://jekyllrb.com/">Jekyll</a>.
     <a href="http://github.com/">Github</a>
   </p>
