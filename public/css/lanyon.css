@@ -160,6 +160,7 @@ code {
   background-color: #f9f9f9;
   border-radius: 3px;
 }
+/*
 pre {
   border-radius: 5px;
   display: block;
@@ -187,6 +188,7 @@ pre code {
 .highlight pre {
   margin-bottom: 0;
 }
+*/
 
 /* Quotes */
 blockquote {
