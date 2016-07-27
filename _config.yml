@@ -1,7 +1,7 @@
 # Dependencies
 markdown:         rdiscount
 #highlighter:      pygments
-highlighter:      Rouge
+highlighter:      rouge
 
 #
 encoding:         "utf-8"

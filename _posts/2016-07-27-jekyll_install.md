@@ -13,5 +13,8 @@ tag: [学习]
     - gem install jekyll
     - gem install jekyll-paginate
     - gem install rdiscount
+    - gem install rouge
+    - rougify style monokai.sublime > rouge.css
 + start server
+    - jekyll build
     - jekyll serve
