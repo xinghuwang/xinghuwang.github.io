@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      \u00a0编码问题 &middot; 十字路口
+    
+  </title>
+
+  <!-- CSS -->
+  <!-- <link rel="stylesheet" href="/public/css/syntax.css"> -->
+  <link rel="stylesheet" href="/public/css/lanyon.css">
+  <link rel="stylesheet" href="/public/css/pygments.css">
+  <link rel="stylesheet" href="/public/css/font-awesome.min.css">
+  <!-- <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700|PT+Sans:400"> -->
+
+  <!-- Icons -->
+  <!-- <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/public/img/apple-touch-icon-144-precomposed.png"> -->
+  <link rel="shortcut icon" href="/public/img/tiger.jpg">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <!-- livereload test -->
+  <!--<script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>-->
+
+  <!-- audioplayer -->
+  <script src="/public/js/jquery-1.11.1.js"></script>
+  <!-- <script src="/public/js/audioplayer/amazingaudioplayer.js"></script> -->
+  <!-- <link rel="stylesheet" type="text/css" href="/public/css/audioplayer/initaudioplayer-1.css"> -->
+
+
+
+</head>
+
+
+  <body class="">
+
+    <!-- Target for toggling the sidebar `.sidebar-checkbox` is for regular
+     styles, `#sidebar-checkbox` for behavior. -->
+<input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox">
+
+<!-- Toggleable sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-item">
+    <div class="sidebar-logo">
+      <a href="/"><img src="/public/img/tiger.jpg"></a>
+    </div>
+    <p>不写博客的程序员不是好码农</p>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="sidebar-nav-item" href="/"><i class="fa fa-home fa-fw"></i>&nbsp 主页·&nbspHome</a>
+    <a class="sidebar-nav-item" href="/archive/"><i class="fa fa-file-text-o fa-fw"></i>&nbsp 归档·&nbspArchive</a>
+    <a class="sidebar-nav-item" href="/category/"><i class="fa fa-book fa-fw"></i>&nbsp 分类·&nbspCategory</a>
+    <a class="sidebar-nav-item" href="/tag/"><i class="fa fa-tags fa-fw"></i>&nbsp 标签·&nbspTag</a>
+    <a class="sidebar-nav-item" href="/works/">works</a>
+    <a class="sidebar-nav-item" href="/about/"><i class="fa fa-hand-o-right fa-fw"></i>&nbsp 关于·&nbspAbout</a>
+  </nav>
+
+  <div class="sidebar-item">
+    <p>
+      &copy; 2016. All rights reserved.
+    </p>
+  </div>
+</div>
+
+
+
+    
+
+    <!-- Wrap is the content to shift when toggling the sidebar. We wrap the
+         content to avoid any CSS collisions with our real content. -->
+    
+
+      <div class="container content">
+      <a href="/">
+        <svg id="mustache" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                 viewBox="0 0 79.5 45.7" enable-background="new 0 0 79.5 45.7" xml:space="preserve">
+                  <g transform="translate(0,-952.36217)" opacity="0.95">
+                    <path id="path2987" fill="#010101" d="M28.2,971.4c-10,0.5-19.1,13.3-28.2,2.1c0,15.1,23.7,30.5,39.8,16.3
+                    c16,14.1,39.8-1.3,39.8-16.3c-12.5,15.4-25-14.4-39.8,4.5C35.8,972.7,31.9,971.2,28.2,971.4z"/>
+                  </g>
+        </svg>
+      </a>
+<h2 class="post-name"></h2>
+<div class="post">
+  <div class="post-heading inside">
+    <img src="/public/img/wangxinghu.jpg">
+    <h1 class="post-title">
+      <a class="post-title-blog" href="">
+        \u00a0编码问题
+      </a>
+    </h1>
+      <p class="post-info">
+        
+          wangxinghu原创
+        
+      </p>
+      <span class="post-info"><i class="fa fa-calendar"></i>&nbsp2016/07/27  </span>
+      <span class="post-info"><i class="fa fa-book"></i>&nbsp<a href="/category/index.html#php">php</a></span>
+      <span class="post-info"><i class="fa fa-tags"></i>&nbsp<a href="/tag/index.html#php">php</a></span> 
+      <span class="post-info">&nbsp<a href="/tag/index.html#编码">编码</a></span>
+      <span class="post-info">&nbsp<a href="/tag/index.html#"></a></span>
+  </div>
+  <div class="post-content">
+    <h3>现象</h3>
+
+<p>有一个发短信的服务，在手机上收到的内容和预期的不一致，空格变成了？。查看数据库和日志都是正常的显示空格。怀疑是字符编码问题，因为数据库和应用的字符集都是utf-8，调用第三方短信通道时被要求转为GBK，既然有思路就上代码复现。</p>
+
+<h3>代码复现</h3>
+
+<pre><code class="php">    $message1 = '点击网址 马上报名！';
+    $message2 = '点击网址 马上报名！';//wrong
+    var_dump(json_encode($message1));
+    var_dump(json_encode($message2));
+</code></pre>
+
+<p>输出如下：</p>
+
+<blockquote><p>string(57) ""\u70b9\u51fb\u7f51\u5740 \u9a6c\u4e0a\u62a5\u540d\uff01""</p>
+
+<p>string(62) ""\u70b9\u51fb\u7f51\u5740\u00a0\u9a6c\u4e0a\u62a5\u540d\uff01""</p></blockquote>
+
+<p>发现<code>message2</code>里的空格的<strong>unicode</strong>字符是<strong>\u00a0</strong>，而<strong>GBK</strong>编码中不存在这个字符。
+<strong>\u00a0</strong>被称为不间断空格<strong>NO-BREAK SPACE</strong>，常见于html中。</p>
+
+<h3>解决</h3>
+
+<p>既然GBK不识别，就需要过滤掉这种非法字符</p>
+
+<pre><code class="php">    $content = str_replace(chr(194) . chr(160), " ", $content);
+</code></pre>
+    
+  </div>
+</div>
+
+<!-- <div class="related">
+  <h2>Related Posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/jekyll/2016/07/27/jekyll_install/">
+            jekyll
+            <small>27 Jul 2016</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/%E6%9D%82%E8%AE%B0/2015/11/05/%E6%8C%81%E7%BB%AD%E5%AD%A6%E4%B9%A0/">
+            持续学习
+            <small>05 Nov 2015</small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</div> -->
+
+
+<div class="sub_pagination">
+  
+  
+    <a class="sub_pagination-item" id="lastest">已经是最新一篇&nbsp<i class="fa fa-unlink"></i></a>
+  
+  
+    <a class="sub_pagination-item newer" href="/jekyll/2016/07/27/jekyll_install/">jekyll&nbsp<i class="fa fa-share"></i></a>
+  
+</div>
+
+
+<!-- <div class="comments"> -->
+<h2>Comments</h2>
+
+
+
+<!-- Duoshuo Comment BEGIN -->  
+<div id="comment">
+    <div class="ds-thread" data-title="\u00a0编码问题"></div>
+    <script type="text/javascript">
+        var duoshuoQuery = {short_name:"wangxinghu"};
+        (function() {
+            var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+            ds.src = '../../../../../public/js/duoshuo.js';
+            ds.charset = 'UTF-8';
+            (document.getElementsByTagName('head')[0]
+                    || document.getElementsByTagName('body')[0]).appendChild(ds);
+        })();
+    </script>
+</div>
+
+
+<!-- Duoshuo Comment END -->
+      </div>
+    </div>
+    
+    <label for="sidebar-checkbox" class="sidebar-toggle"></label>
+    <div class="footer">
+  <p>  Copyright © 2016 - <a href="/">tiger</a> - Powered by 
+    <a href="http://jekyllrb.com/">Jekyll</a>.
+    <a href="http://github.com/">Github</a>
+  </p>
+  <ul>
+    <li><a href="https://github.com/xinghuwang"><i class="fa fa-github fa-2x"></i></a></li>
+  </ul>
+</div>
+
+
+    <!-- "The ending isn’t any more important than the moments leading to it." -Dr. Eva Rosalene, To The Moon -->
+  </body>
+</html>
+
