@@ -1,3 +1,11 @@
+---
+layout: post
+author: wangxinghu
+title: server_check
+category: linux
+tag: [linux]
+---
+
 ### 应该弄清的问题
 
 + 事故的发生时间,持续时间

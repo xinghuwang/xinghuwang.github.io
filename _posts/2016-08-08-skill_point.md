@@ -1,3 +1,11 @@
+---
+layout: post
+author: wangxinghu
+title: skill_point
+category: skill
+tag: [skill]
+---
+
 ## 技能点
 
 ### git
