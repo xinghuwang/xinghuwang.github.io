@@ -1,4 +1,121 @@
-<h3 id="section">应该弄清的问题</h3>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <!-- Enable responsiveness on mobile devices-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      server_check &middot; 十字路口
+    
+  </title>
+
+  <!-- CSS -->
+  <!-- <link rel="stylesheet" href="/public/css/syntax.css"> -->
+  <link rel="stylesheet" href="/public/css/lanyon.css">
+  <link rel="stylesheet" href="/public/css/highlight.css">
+  <!--<link rel="stylesheet" href="/public/css/pygments.css">-->
+  <!--<link rel="stylesheet" href="/public/css/rouge.css">-->
+  <link rel="stylesheet" href="/public/css/font-awesome.min.css">
+  <!-- <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700|PT+Sans:400"> -->
+
+  <!-- Icons -->
+  <!-- <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/public/img/apple-touch-icon-144-precomposed.png"> -->
+  <link rel="shortcut icon" href="/public/img/tiger.jpg">
+
+  <!-- RSS -->
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="/atom.xml">
+
+  <!-- livereload test -->
+  <!--<script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')</script>-->
+
+  <!-- audioplayer -->
+  <script src="/public/js/jquery-1.11.1.js"></script>
+  <script src="/public/js/highlight.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- <script src="/public/js/audioplayer/amazingaudioplayer.js"></script> -->
+  <!-- <link rel="stylesheet" type="text/css" href="/public/css/audioplayer/initaudioplayer-1.css"> -->
+
+
+
+</head>
+
+
+  <body class="">
+
+    <!-- Target for toggling the sidebar `.sidebar-checkbox` is for regular
+     styles, `#sidebar-checkbox` for behavior. -->
+<input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox">
+
+<!-- Toggleable sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-item">
+    <div class="sidebar-logo">
+      <a href="/"><img src="/public/img/tiger.jpg"></a>
+    </div>
+    <p>不写博客的程序员不是好码农</p>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="sidebar-nav-item" href="/"><i class="fa fa-home fa-fw"></i>&nbsp 主页·&nbspHome</a>
+    <a class="sidebar-nav-item" href="/archive/"><i class="fa fa-file-text-o fa-fw"></i>&nbsp 归档·&nbspArchive</a>
+    <a class="sidebar-nav-item" href="/category/"><i class="fa fa-book fa-fw"></i>&nbsp 分类·&nbspCategory</a>
+    <a class="sidebar-nav-item" href="/tag/"><i class="fa fa-tags fa-fw"></i>&nbsp 标签·&nbspTag</a>
+    <a class="sidebar-nav-item" href="/works/">works</a>
+    <a class="sidebar-nav-item" href="/about/"><i class="fa fa-hand-o-right fa-fw"></i>&nbsp 关于·&nbspAbout</a>
+  </nav>
+
+  <div class="sidebar-item">
+    <p>
+      &copy; 2016. All rights reserved.
+    </p>
+  </div>
+</div>
+
+
+
+    
+
+    <!-- Wrap is the content to shift when toggling the sidebar. We wrap the
+         content to avoid any CSS collisions with our real content. -->
+    
+
+      <div class="container content">
+      <a href="/">
+        <svg id="mustache" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+                 viewBox="0 0 79.5 45.7" enable-background="new 0 0 79.5 45.7" xml:space="preserve">
+                  <g transform="translate(0,-952.36217)" opacity="0.95">
+                    <path id="path2987" fill="#010101" d="M28.2,971.4c-10,0.5-19.1,13.3-28.2,2.1c0,15.1,23.7,30.5,39.8,16.3
+                    c16,14.1,39.8-1.3,39.8-16.3c-12.5,15.4-25-14.4-39.8,4.5C35.8,972.7,31.9,971.2,28.2,971.4z"/>
+                  </g>
+        </svg>
+      </a>
+<h2 class="post-name"></h2>
+<div class="post">
+  <div class="post-heading inside">
+    <img src="/public/img/wangxinghu.jpg">
+    <h1 class="post-title">
+      <a class="post-title-blog" href="">
+        server_check
+      </a>
+    </h1>
+      <p class="post-info">
+        
+          wangxinghu原创
+        
+      </p>
+      <span class="post-info"><i class="fa fa-calendar"></i>&nbsp2016/08/08  </span>
+      <span class="post-info"><i class="fa fa-book"></i>&nbsp<a href="/category/index.html#linux">linux</a></span>
+      <span class="post-info"><i class="fa fa-tags"></i>&nbsp<a href="/tag/index.html#linux">linux</a></span> 
+      <span class="post-info">&nbsp<a href="/tag/index.html#"></a></span>
+      <span class="post-info">&nbsp<a href="/tag/index.html#"></a></span>
+  </div>
+  <div class="post-content">
+    <h3 id="section">应该弄清的问题</h3>
 
 <ul>
   <li>事故的发生时间,持续时间</li>
@@ -17,12 +134,11 @@
 </ul>
 
 <blockquote>
-  <div class="highlighter-rouge"><pre class="highlight"><code>  free1 + buffers1 + cached1 = free2
+  <pre><code>  free1 + buffers1 + cached1 = free2
   used1 = buffers1 + cached1 + used2
   实际看第二行的free
   share 共享内存
 </code></pre>
-  </div>
 </blockquote>
 
 <ul>
@@ -30,10 +146,9 @@
 </ul>
 
 <blockquote>
-  <div class="highlighter-rouge"><pre class="highlight"><code>  负载1min, 5min, 15min
+  <pre><code>  负载1min, 5min, 15min
   系统运行了多长时间
 </code></pre>
-  </div>
 </blockquote>
 
 <ul>
@@ -41,14 +156,13 @@
 </ul>
 
 <blockquote>
-  <div class="highlighter-rouge"><pre class="highlight"><code>  F:选择排序的列
+  <pre><code>  F:选择排序的列
   F:选择排序的列
   R:倒排
   &lt;&gt;:翻页
   f:选择显示的列
   o:改变显示的顺序
 </code></pre>
-  </div>
 </blockquote>
 
 <h3 id="section-1">查看系统报错信息</h3>
@@ -82,7 +196,7 @@
 </ul>
 
 <blockquote>
-  <div class="highlighter-rouge"><pre class="highlight"><code>   -b：报告I/O使用情况以及传输速率。（只适用于2.5及之前的内核，所以新内核有可能不支持这个选项）
+  <pre><code>   -b：报告I/O使用情况以及传输速率。（只适用于2.5及之前的内核，所以新内核有可能不支持这个选项）
    -B：报告“页”使用情况
    -c：报告进程创建情况
    -d：报告每一个块设备的使用情况
@@ -109,7 +223,6 @@
   怀疑内存存在瓶颈，可用 sar -B、sar -r 和 sar -W 等来查看
   怀疑I/O存在瓶颈，可用 sar -b、sar -u 和 sar -d 等来查看
 </code></pre>
-  </div>
 </blockquote>
 
 <h3 id="section-2">查看运行的进程</h3>
@@ -121,7 +234,7 @@
 </ul>
 
 <blockquote>
-  <div class="highlighter-rouge"><pre class="highlight"><code>  lsof  filename 显示打开指定文件的所有进程
+  <pre><code>  lsof  filename 显示打开指定文件的所有进程
   lsof -a 表示两个参数都必须满足时才显示结果
   lsof -c string   显示COMMAND列中包含指定字符的进程所有打开的文件
   lsof -u username  显示所属user进程打开的文件
@@ -139,7 +252,6 @@
            service --&gt; /etc/service中的 service name (可以不只一个)
            port --&gt; 端口号 (可以不只一个)
 </code></pre>
-  </div>
 </blockquote>
 
 <h3 id="section-3">监听的网络服务</h3>
@@ -151,7 +263,7 @@
 </ul>
 
 <blockquote>
-  <div class="highlighter-rouge"><pre class="highlight"><code>  -a (all)显示所有选项，默认不显示LISTEN相关
+  <pre><code>  -a (all)显示所有选项，默认不显示LISTEN相关
   -t (tcp)仅显示tcp相关选项
   -u (udp)仅显示udp相关选项
   -n 拒绝显示别名，能显示数字的全部转化成数字。
@@ -165,7 +277,6 @@
 
   提示：LISTEN和LISTENING的状态只有用-a或者-l才能看到
 </code></pre>
-  </div>
 </blockquote>
 
 <ul>
@@ -173,7 +284,7 @@
 </ul>
 
 <blockquote>
-  <div class="highlighter-rouge"><pre class="highlight"><code>  -n, 不解析服务名称
+  <pre><code>  -n, 不解析服务名称
   -r, 解析主机名
   -a, 显示所有套接字（sockets）
   -l, 显示监听状态的套接字（sockets）
@@ -197,7 +308,6 @@
   -F, -F=FILE   从文件中都去过滤器信息
          FILTER := [ state TCP-STATE ] [ EXPRESSION ]
 </code></pre>
-  </div>
 </blockquote>
 
 <ul>
@@ -205,7 +315,7 @@
 </ul>
 
 <blockquote>
-  <div class="highlighter-rouge"><pre class="highlight"><code>  tcpdump [ -adeflnNOpqStvx ] [ -c 数量 ] [ -F 文件名 ]
+  <pre><code>  tcpdump [ -adeflnNOpqStvx ] [ -c 数量 ] [ -F 文件名 ]
   [ -i 网络接口 ] [ -r 文件名] [ -s snaplen ]
   [ -T 类型 ] [ -w 文件名 ] [表达式 ]
   1. tcpdump的选项介绍
@@ -227,7 +337,6 @@
   -w 　直接将包写入文件中，并不分析和打印出来；
   -T 　将监听到的包直接解释为指定的类型的报文，常见的类型有rpc 
 </code></pre>
-  </div>
 </blockquote>
 
 <ul>
@@ -247,7 +356,7 @@
 </ul>
 
 <blockquote>
-  <div class="highlighter-rouge"><pre class="highlight"><code>   -c 仅显示CPU统计信息.与-d选项互斥.
+  <pre><code>   -c 仅显示CPU统计信息.与-d选项互斥.
    -d 仅显示磁盘统计信息.与-c选项互斥.
    -k 以K为单位显示每秒的磁盘请求数,默认单位块.
    -p device | ALL
@@ -259,7 +368,6 @@
    -V    打印版本号和帮助信息.
    -x    输出扩展信息
 </code></pre>
-  </div>
 </blockquote>
 
 <ul>
@@ -267,7 +375,7 @@
 </ul>
 
 <blockquote>
-  <div class="highlighter-rouge"><pre class="highlight"><code>  -a：显示活跃和非活跃内存
+  <pre><code>  -a：显示活跃和非活跃内存
   -f：显示从系统启动至今的fork数量 。
   -m：显示slabinfo
   -n：只在开始时显示一次各字段名称。
@@ -279,7 +387,6 @@
   -S：使用指定单位显示。参数有 k 、K 、m 、M ，分别代表1000、1024、1000000、1048576字节（byte）。默认单位为K（1024 bytes）
   -V：显示vmstat版本信息。
 </code></pre>
-  </div>
 </blockquote>
 
 <ul>
@@ -297,7 +404,7 @@
 </ul>
 
 <blockquote>
-  <div class="highlighter-rouge"><pre class="highlight"><code>  -l ：显示负载统计量
+  <pre><code>  -l ：显示负载统计量
   -m ：显示内存使用率（包括used，buffer，cache，free值）
   -r ：显示I/O统计
   -s ：显示交换分区使用情况
@@ -317,7 +424,6 @@
   -–top-io ：显示正常I/O最大的进程
   -–top-mem ：显示占用最多内存的进程
 </code></pre>
-  </div>
 </blockquote>
 
 <h3 id="section-5">硬件</h3>
@@ -364,7 +470,7 @@
 </ul>
 
 <blockquote>
-  <div class="highlighter-rouge"><pre class="highlight"><code>  -c 统计每一系统调用的所执行的时间,次数和出错的次数等.
+  <pre><code>  -c 统计每一系统调用的所执行的时间,次数和出错的次数等.
   -d 输出strace关于标准错误的调试信息.
   -f 跟踪由fork调用所产生的子进程.
   -ff 如果提供-o filename,则所有进程的跟踪结果输出到相应的filename.pid中,pid是各进程的进程号.
@@ -421,11 +527,102 @@
   -u username
   以username 的UID和GID执行被跟踪的命令
 </code></pre>
-  </div>
 </blockquote>
 
 <ul>
   <li>ltrace</li>
   <li>dtruss</li>
 </ul>
+
+    
+  </div>
+</div>
+
+<!-- <div class="related">
+  <h2>Related Posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/skill/2016/08/08/skill_point/">
+            skill_point
+            <small>08 Aug 2016</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/php/2016/07/27/php%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E9%97%AE%E9%A2%98/">
+            编码问题
+            <small>27 Jul 2016</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/jekyll/2016/07/27/jekyll_install/">
+            jekyll
+            <small>27 Jul 2016</small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</div> -->
+
+
+<div class="sub_pagination">
+  
+  
+    <a class="sub_pagination-item newer" href="/skill/2016/08/08/skill_point/">上一篇&nbsp<i class="fa fa-chain"></i></a>
+  
+  
+    <a class="sub_pagination-item newer" href="/php/2016/07/27/php%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E9%97%AE%E9%A2%98/">编码问题&nbsp<i class="fa fa-share"></i></a>
+  
+</div>
+
+
+<!-- <div class="comments"> -->
+<h2>Comments</h2>
+
+
+
+<!-- Duoshuo Comment BEGIN -->  
+<div id="comment">
+    <div class="ds-thread" data-title="server_check"></div>
+    <script type="text/javascript">
+        var duoshuoQuery = {short_name:"wangxinghu"};
+        (function() {
+            var ds = document.createElement('script');
+            ds.type = 'text/javascript';ds.async = true;
+            ds.src = '../../../../../public/js/duoshuo.js';
+            ds.charset = 'UTF-8';
+            (document.getElementsByTagName('head')[0]
+                    || document.getElementsByTagName('body')[0]).appendChild(ds);
+        })();
+    </script>
+</div>
+
+
+<!-- Duoshuo Comment END -->
+      </div>
+    </div>
+    
+    <label for="sidebar-checkbox" class="sidebar-toggle"></label>
+    <div class="footer">
+  <p>  Copyright © 2016 - <a href="/">tiger</a> - Powered by 
+    <a href="http://jekyllrb.com/">Jekyll</a>.
+    <a href="http://github.com/">Github</a>
+  </p>
+  <ul>
+    <li><a href="https://github.com/xinghuwang"><i class="fa fa-github fa-2x"></i></a></li>
+  </ul>
+</div>
+
+
+    <!-- "The ending isn’t any more important than the moments leading to it." -Dr. Eva Rosalene, To The Moon -->
+  </body>
+</html>
 
